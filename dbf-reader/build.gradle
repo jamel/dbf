@@ -1,0 +1,6 @@
+modifyPom { pom ->
+    pom.project {
+        name "Java DBF reader"
+        description "Java library for fast reading DBF-files"
+    }
+}

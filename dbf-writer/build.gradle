@@ -1,0 +1,6 @@
+modifyPom { pom ->
+    pom.project {
+        name "Java DBF writer"
+        description "Java library for fast writing DBF-files"
+    }
+}
