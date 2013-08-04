@@ -16,8 +16,6 @@ import org.jamel.dbf.utils.DbfUtils;
  */
 public class DbfHeader {
 
-    private static final byte SIG_DBASE_III = (byte) 0x03;
-
     private byte signature;              /* 0     */
     private byte year;                   /* 1     */
     private byte month;                  /* 2     */
@@ -35,13 +33,7 @@ public class DbfHeader {
     private byte languageDriver;         /* 29    */
     private short reserv4;               /* 30-31 */
     private List<DbfField> fields;       /* each 32 bytes */
-    private byte terminator1;            /* n+1 */
 
-
-    private DbfHeader() {
-        this.signature = SIG_DBASE_III;
-        this.terminator1 = 0x0D;
-    }
 
     public static DbfHeader read(DataInput dataInput) throws DbfException {
         try {

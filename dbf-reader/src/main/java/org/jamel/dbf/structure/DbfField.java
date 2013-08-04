@@ -15,6 +15,8 @@ import org.jamel.dbf.utils.DbfUtils;
  */
 public class DbfField {
 
+    public static final int HEADER_TERMINATOR = 0x0d;
+
     private String fieldName;                   /* 0-10  */
     private byte dataType;                      /* 11    */
     private int reserv1;                        /* 12-15 */
@@ -39,14 +41,21 @@ public class DbfField {
      *
      * @param in DataInputStream
      * @return created DBFField object.
-     * @throws java.io.IOException if any stream reading problems occurs.
+     * @throws DbfException if any stream reading problems occurs.
      */
     public static DbfField read(DataInput in) throws DbfException {
         try {
             DbfField field = new DbfField();
 
-            byte[] nameBuf = new byte[11];                      /* 0-10  */
-            in.readFully(nameBuf);
+            byte firstByte = in.readByte();                     /* 0     */
+            if (firstByte == HEADER_TERMINATOR) {
+                // we get end of the dbf header
+                return null;
+            }
+
+            byte[] nameBuf = new byte[11];                      /* 1-10  */
+            in.readFully(nameBuf, 1, 10);
+            nameBuf[0] = firstByte;
 
             int nonZeroIndex = nameBuf.length - 1;
             while (nonZeroIndex >= 0 && nameBuf[nonZeroIndex] == 0) nonZeroIndex--;

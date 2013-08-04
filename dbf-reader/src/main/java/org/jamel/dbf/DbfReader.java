@@ -12,6 +12,9 @@ import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
 import org.jamel.dbf.utils.DbfUtils;
+import org.jamel.dbf.utils.StringUtils;
+
+import static org.jamel.dbf.utils.StringUtils.rightPad;
 
 /**
  * Dbf file reader.
@@ -169,12 +172,26 @@ public class DbfReader {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(256);
-        sb.append(header.getYear()).append('-').append(header.getMonth()).append('-').append(header.getDay()).append('\n')
+        sb.append("Created at: ")
+                        .append(header.getYear()).append('-').append(header.getMonth())
+                        .append('-').append(header.getDay()).append('\n')
                 .append("Total records: ").append(getRecordCount()).append('\n')
-                .append("Header length: ").append(header.getHeaderLength()).append('\n');
+                .append("Header length: ").append(header.getHeaderLength()).append('\n')
+                .append("Columns: ").append('\n');
+
+        sb.append(rightPad("Name", 16, ' '))
+                .append(rightPad("Type", 8, ' '))
+                .append(rightPad("Length", 8, ' '))
+                .append(rightPad("Decimal", 8, ' '))
+                .append('\n');
 
         for (int i = 0; i < header.getFieldsCount(); i++) {
-            sb.append(header.getField(i).getName()).append('\n');
+            DbfField field = header.getField(i);
+            sb.append(rightPad(field.getName(), 16, ' '))
+                    .append(rightPad(String.valueOf((char) field.getDataType()), 8, ' '))
+                    .append(rightPad(String.valueOf(field.getFieldLength()), 8, ' '))
+                    .append(rightPad(String.valueOf(field.getDecimalCount()), 8, ' '))
+                    .append('\n');
         }
 
         return sb.toString();

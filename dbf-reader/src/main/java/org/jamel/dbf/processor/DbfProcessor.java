@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.jamel.dbf.DbfReader;
 import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
+import org.jamel.dbf.utils.StringUtils;
 
 /**
  * @author Sergey Polovko
@@ -51,25 +53,33 @@ public final class DbfProcessor {
         }
     }
 
-    public static void writeToTxtFile(File dbf, File txt) throws DbfException {
+    public static void writeToTxtFile(File dbf, File txt, Charset dbfEncoding) throws DbfException {
         DbfReader reader = new DbfReader(dbf);
         PrintWriter writer = null;
 
         try {
             DbfHeader header = reader.getHeader();
 
-            String[] title = new String[header.getFieldsCount()];
+            String[] titles = new String[header.getFieldsCount()];
             for (int i = 0; i < header.getFieldsCount(); i++) {
                 DbfField field = header.getField(i);
-                title[i] = rightPad(field.getName(), field.getFieldLength(), ' ');
+                titles[i] = StringUtils.rightPad(field.getName(), field.getFieldLength(), ' ');
             }
 
             writer = new PrintWriter(new BufferedWriter(new FileWriter(txt)));
-            writer.println(Arrays.toString(title));
+            for (String title : titles) writer.print(title);
+            writer.println();
 
             Object[] row;
             while ((row = reader.nextRecord()) != null) {
-                writer.println(Arrays.toString(row));
+                for (int i = 0; i < header.getFieldsCount(); i++) {
+                    DbfField field = header.getField(i);
+                    String value = field.getDataType() == 'C'
+                            ? new String((byte[]) row[i], dbfEncoding)
+                            : String.valueOf(row[i]);
+                    writer.print(StringUtils.rightPad(value, field.getFieldLength(), ' '));
+                }
+                writer.println();
             }
         } catch (IOException e) {
             throw new DbfException("Cannot write Dbf to text file", e);
@@ -77,16 +87,5 @@ public final class DbfProcessor {
             if (writer != null) writer.close();
             reader.close();
         }
-    }
-
-    private static String rightPad(String str, int size, char padChar) {
-        // returns original string when possible
-        if (str.length() >= size) return str;
-
-        StringBuilder sb = new StringBuilder(size + 1).append(str);
-        while (sb.length() < size) {
-            sb.append(padChar);
-        }
-        return sb.toString();
     }
 }
