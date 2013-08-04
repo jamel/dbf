@@ -1,4 +1,4 @@
-dbf-reader
-==========
+dbf
+====
 
-Java library for fast reading DBF-files.
+Java library for fast reading/writing DBF-files.

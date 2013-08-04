@@ -1,0 +1,4 @@
+include "dbf-reader"
+include "dbf-writer"
+
+rootProject.name = "dbf"

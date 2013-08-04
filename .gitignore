@@ -1,4 +1,8 @@
 *.class
+.gradle/
+out/
+target/
+build/
 
 # Package Files #
 *.jar

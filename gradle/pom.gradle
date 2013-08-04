@@ -1,0 +1,49 @@
+ext {
+	ext.poms = []
+	afterEvaluate {
+		poms*.whenConfigured { pom ->
+			pomModifications.each {
+				configure(pom, it)
+			}
+		}
+	}
+	pomModifications = []
+	modifyPom = { pomModifications << it }
+}
+
+tasks.withType(Upload) {
+	repositories.withType(org.gradle.api.artifacts.maven.MavenResolver) {
+		poms << it.pom
+	}
+}
+
+modifyPom {
+	project {
+        packaging "jar"
+        url "http://github.com/jamel/dbf"
+        inceptionYear "2013"
+
+        scm {
+            url "http://github.com/jamel/dbf"
+            connection "scm:git:http://github.com/jamel/dbf.git"
+            developerConnection "scm:git:git@github.com:jamel/dbf.git"
+        }
+
+        licenses {
+            license {
+                name "The Apache Software License, Version 2.0"
+                url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution "repo"
+            }
+        }
+
+        developers {
+            developer {
+                id "jamel"
+                name "Sergey Polovko"
+            }
+        }
+	}
+
+	dependencies.removeAll(dependencies.findAll { it.scope == "test" })
+}
