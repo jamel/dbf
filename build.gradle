@@ -18,7 +18,7 @@ allprojects {
     apply plugin: "idea"
 
     group = "org.jamel.dbf"
-    version = "0.0.2${isReleaseBuild ? "" : "-SNAPSHOT"}"
+    version = "0.0.3${isReleaseBuild ? "" : "-SNAPSHOT"}"
 
     repositories {
         mavenCentral()
