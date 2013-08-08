@@ -7,6 +7,8 @@ Java library for fast reading/writing DBF-files.
 For build project from sources you need to run gradlew script from the root directory:
 
 ```sh
+git clone git@github.com:jamel/dbf.git
+cd dbf
 ./grablew clean build
 ```
 
@@ -18,7 +20,7 @@ Maven artifact is available from maven central repocitor. Just add dependency in
 <dependency>
     <groupId>org.jamel.dbf</groupId>
     <artifactId>dbf-reader</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
@@ -72,9 +74,9 @@ public class PricesCalcExampleV1 {
         private int rowsCount;
 
         @Override
-        public void processRow(Object[] row) {            
+        public void processRow(Object[] row) {
             // assuming that there are prices in the 4th column
-            totalSum += ((Double) row[3]); 
+            totalSum += ((Double) row[3]);
             rowsCount++;
         }
 
@@ -94,9 +96,8 @@ public class PricesCalcExampleV1 {
 ```java
 public class DbfInfo {
     public static void main(String[] args) {
-        DbfReader reader = new DbfReader(new File("altnames.dbf"));
-        System.out.println(reader.toString());
-        reader.close();
+        String dbfInfo = DbfProcessor.readDbfInfo(new File("altnames.dbf"))
+        System.out.println(dbfInfo);
     }
 }
 ```
@@ -107,11 +108,12 @@ Will print:
 Created at: 13-7-15
 Total records: 39906
 Header length: 129
-Columns: 
-Name            Type    Length  Decimal 
-OLDCODE         C       19      0       
-NEWCODE         C       19      0       
-LEVEL           C       1       0 
+Columns:
+  #  Name            Type    Length  Decimal
+---------------------------------------------
+  0  OLDCODE         C       19      0
+  1  NEWCODE         C       19      0
+  2  LEVEL           C       1       0
 ```
 
 #### 4. Manually processing rows (low level API)
@@ -121,21 +123,18 @@ In the next example we again calculate total sum and average price of data from 
 ```java
 public class PricesCalcExampleV2 {
     public static void main(String[] args) {
-        DbfReader reader = new DbfReader(new File("products.dbf"));
-        double totalSum = 0;
+        try (DbfReader reader = new DbfReader(new File("products.dbf"))) {
+            double totalSum = 0;
 
-        try {
             Object[] row;
             while ((row = reader.nextRecord()) != null) {
                 // assuming that there are prices in the 4th column
-                totalSum += ((Double) row[3]); 
+                totalSum += ((Double) row[3]);
             }
-        } finally {
-            reader.close();
-        }
 
-        System.out.println("Total sum: " + totalSum);
-        System.out.println("Average price: " + totalSum / reader.getHeader().getNumberOfRecords());
+            System.out.println("Total sum: " + totalSum);
+            System.out.println("Average price: " + totalSum / reader.getHeader().getNumberOfRecords());
+        }
     }
 }
 ```
@@ -148,9 +147,9 @@ If you have no tool for viewing DBF fiels you could simply output all its conten
 public class Dbf2Txt {
     public static void main(String[] args) {
         DbfProcessor.writeToTxtFile(
-            new File("altnames.dbf"), 
+            new File("altnames.dbf"),
             new File("altnames.txt"),
-            Charset.forName("cp866"));        
+            Charset.forName("cp866"));
     }
 }
 ```
