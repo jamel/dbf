@@ -24,6 +24,16 @@ Maven artifact is available from maven central repocitor. Just add dependency in
 </dependency>
 ```
 
+### Supported fields types
+
+DBF field type | Returned as
+--- | --- 
+character (C) | for reduce memory consumption and improve performance it returns as `byte[]`. If you need to get a String, use the appropriate constructor of String class.
+date (D) | `java.util.Date`
+float (F) | `java.lang.Float`
+logical (L) | `java.lang.Boolean`
+numeric (N) | `java.lang.Number`
+
 ### How to use
 
 #### 1. Loading data from small dbf files into collection
@@ -40,10 +50,10 @@ public class LoadStreetsExample {
             public Street mapRow(Object[] row) {
                 // here we can change string encoding if it is needed
                 String name = new String(DbfUtils.trimLeftSpaces((byte[]) row[0]));
-                Integer zip = (Integer) row[1];
+                Number zip = (Number) row[1];
                 Date createdAt = (Date) row[2];
 
-                return new Street(name, zip, createdAt);
+                return new Street(name, zip.intValue(), createdAt);
             }
         });
 
@@ -76,7 +86,7 @@ public class PricesCalcExampleV1 {
         @Override
         public void processRow(Object[] row) {
             // assuming that there are prices in the 4th column
-            totalSum += ((Double) row[3]);
+            totalSum += ((Number) row[3]).doubleValue();
             rowsCount++;
         }
 
@@ -129,7 +139,7 @@ public class PricesCalcExampleV2 {
             Object[] row;
             while ((row = reader.nextRecord()) != null) {
                 // assuming that there are prices in the 4th column
-                totalSum += ((Double) row[3]);
+                totalSum += ((Number) row[3]).doubleValue();
             }
 
             System.out.println("Total sum: " + totalSum);
