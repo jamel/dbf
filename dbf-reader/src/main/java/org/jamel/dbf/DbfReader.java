@@ -1,19 +1,13 @@
 package org.jamel.dbf;
 
-import java.io.BufferedInputStream;
-import java.io.Closeable;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.GregorianCalendar;
-
 import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
 import org.jamel.dbf.utils.DbfUtils;
+
+import java.io.*;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * Dbf reader.
@@ -106,7 +100,7 @@ public class DbfReader implements Closeable {
         return buf;
     }
 
-    protected Object readDateValue(DbfField field, byte[] buf) throws IOException {
+    protected Date readDateValue(DbfField field, byte[] buf) throws IOException {
         int year = DbfUtils.parseInt(buf, 0, 4);
         int month = DbfUtils.parseInt(buf, 4, 6);
         int day = DbfUtils.parseInt(buf, 6, 8);
@@ -123,12 +117,12 @@ public class DbfReader implements Closeable {
         }
     }
 
-    protected Object readLogicalValue(DbfField field, byte[] buf) throws IOException {
+    protected Boolean readLogicalValue(DbfField field, byte[] buf) throws IOException {
         boolean isTrue = (buf[0] == 'Y' || buf[0] == 'y' || buf[0] == 'T' || buf[0] == 't');
         return isTrue ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    protected Object readNumericValue(DbfField field, byte[] buf) throws IOException {
+    protected Number readNumericValue(DbfField field, byte[] buf) throws IOException {
         try {
             byte[] numericBuf = DbfUtils.trimLeftSpaces(buf);
             boolean processable = numericBuf.length > 0 && !DbfUtils.contains(numericBuf, (byte) '?');
