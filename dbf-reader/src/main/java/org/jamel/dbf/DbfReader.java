@@ -66,7 +66,7 @@ public class DbfReader implements Closeable {
                 if (nextByte == DATA_ENDED) {
                     return null;
                 } else if (nextByte == DATA_DELETED) {
-                    dataInputStream.skip(header.getRecordLength() - 1);
+                    dataInputStream.skipBytes(header.getRecordLength() - 1);
                 }
             } while (nextByte == DATA_DELETED);
 
