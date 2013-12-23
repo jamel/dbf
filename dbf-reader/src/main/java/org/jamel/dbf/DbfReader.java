@@ -24,7 +24,6 @@ public class DbfReader implements Closeable {
     private DataInputStream dataInputStream;
     private final DbfHeader header;
 
-
     public DbfReader(File file) throws DbfException {
         try {
             dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
@@ -49,7 +48,7 @@ public class DbfReader implements Closeable {
         // it might be required to jump to the start of records at times
         int dataStartIndex = header.getHeaderLength() - 32 * (header.getFieldsCount() + 1) - 1;
         if (dataStartIndex > 0) {
-            dataInputStream.skip(dataStartIndex);
+            dataInputStream.skipBytes(dataStartIndex);
         }
     }
 
@@ -84,7 +83,7 @@ public class DbfReader implements Closeable {
 
     private Object readFieldValue(DbfField field) throws IOException {
         byte buf[] = new byte[field.getFieldLength()];
-        dataInputStream.read(buf);
+        dataInputStream.readFully(buf);
 
         switch (field.getDataType()) {
             case 'C': return readCharacterValue(field, buf);
@@ -150,8 +149,8 @@ public class DbfReader implements Closeable {
     public void close() {
         try {
             // this method should be idempotent
-            if (dataInputStream != null) {
-                dataInputStream.close();
+            if (dataInputStream instanceof Closeable) {
+                ((Closeable) dataInputStream).close();
                 dataInputStream = null;
             }
         } catch (IOException e) {
