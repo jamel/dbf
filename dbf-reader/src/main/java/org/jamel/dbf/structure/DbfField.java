@@ -16,6 +16,11 @@ import org.jamel.dbf.utils.DbfUtils;
 public class DbfField {
 
     public static final int HEADER_TERMINATOR = 0x0d;
+    public static final byte TYPE_CHAR = 'C';
+    public static final byte TYPE_DATE = 'D';
+    public static final byte TYPE_FLOAT = 'F';
+    public static final byte TYPE_LOGICAL = 'L';
+    public static final byte TYPE_NUMERIC = 'N';
 
     private String fieldName;                   /* 0-10  */
     private byte dataType;                      /* 11    */
