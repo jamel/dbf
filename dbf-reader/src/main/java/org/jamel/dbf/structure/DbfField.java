@@ -28,9 +28,10 @@ public class DbfField {
     private byte setFieldsFlag;                 /* 23    */
     private byte[] reserv4 = new byte[7];       /* 24-30 */
     private byte indexFieldFlag;                /* 31    */
+    private final int fieldIndex;
 
-
-    private DbfField() {
+    private DbfField(int fieldIndex) {
+        this.fieldIndex = fieldIndex;
     }
 
     /**
@@ -43,9 +44,9 @@ public class DbfField {
      * @return created DBFField object.
      * @throws DbfException if any stream reading problems occurs.
      */
-    public static DbfField read(DataInput in) throws DbfException {
+    public static DbfField read(DataInput in, int fieldIndex) throws DbfException {
         try {
-            DbfField field = new DbfField();
+            DbfField field = new DbfField(fieldIndex);
 
             byte firstByte = in.readByte();                     /* 0     */
             if (firstByte == HEADER_TERMINATOR) {
@@ -93,6 +94,8 @@ public class DbfField {
     public int getDecimalCount() {
         return decimalCount;
     }
+
+    public int getFieldIndex() { return fieldIndex; }
 }
 
 
