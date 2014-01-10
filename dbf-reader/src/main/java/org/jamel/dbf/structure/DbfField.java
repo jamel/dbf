@@ -100,7 +100,9 @@ public class DbfField {
         return decimalCount;
     }
 
-    public int getFieldIndex() { return fieldIndex; }
+    public int getFieldIndex() {
+        return fieldIndex;
+    }
 }
 
 
