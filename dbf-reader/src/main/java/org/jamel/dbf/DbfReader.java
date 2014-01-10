@@ -77,22 +77,26 @@ public class DbfReader implements Closeable {
      * by calling {@link DbfReader#nextRecord()}.
      *
      * @param n The zero-based record index.
-     * @return {@code true} if the seek operation was successful, {@code false} otherwise
      */
-    public boolean seekToRecord(int n) {
-        if (currentRecordIndex != n && canSeek() && n >= 0 && n <= header.getNumberOfRecords()) {
+    public void seekToRecord(int n) {
+        if (!canSeek()) {
+            throw new DbfException("Seeking is not supported.");
+        }
+        if (currentRecordIndex != n) {
+            if (n < 0 || n >= header.getNumberOfRecords()) {
+                throw new DbfException(String.format("Record index out of range [0, %d]: %d",
+                        header.getNumberOfRecords(), n));
+            }
             long position = header.getHeaderLength() + n * header.getRecordLength();
             try {
                 ((RandomAccessFile) dataInput).seek(position);
                 currentRecordIndex = n;
-                return true;
             } catch (IOException e) {
                 currentRecordIndex = INVALID_RECORD_INDEX;
                 throw new DbfException(
                         String.format("Failed to seek to record %d of %d", n, header.getNumberOfRecords()), e);
             }
         }
-        return false;
     }
 
     /**
