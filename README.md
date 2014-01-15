@@ -164,6 +164,28 @@ public class Dbf2Txt {
 }
 ```
 
+#### 6. Read DBF records at a specified indices
+
+To read one or more records at specific positions in the DBF without iterating through all records, you will have to use the DbfReader constructor which takes a File as an argument.
+
+```java
+public class RandomRecordAccess {
+    public static void main(String[] args) {
+        try (DbfReader reader = new DbfReader(new File("multiple-records.dbf"))) {
+            // read the tenth record (the indices are zero-based)
+            reader.seekToRecord(9);
+            Object[] record = reader.nextRecord();
+            // process the record ...
+
+            // read the third record
+            reader.seekToRecord(2);
+            record = reader.nextRecord();
+            // process the record ...
+        }
+    }
+}
+```
+
 ## dbf-writer
 
 Dbf writing functionality currently is not available.
