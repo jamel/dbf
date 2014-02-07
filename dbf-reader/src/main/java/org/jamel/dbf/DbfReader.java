@@ -23,17 +23,11 @@ import static org.jamel.dbf.structure.DbfField.TYPE_NUMERIC;
  * @see <a href="http://www.fship.com/dbfspecs.txt">DBF specification</a>
  */
 public class DbfReader implements Closeable {
-    /**
-     * Constant for an invalid record index.
-     */
-    public static final int INVALID_RECORD_INDEX = -1;
-
     protected final byte DATA_ENDED = 0x1A;
     protected final byte DATA_DELETED = 0x2A;
 
     private DataInput dataInput;
     private final DbfHeader header;
-    private int currentRecordIndex = INVALID_RECORD_INDEX;
 
     public DbfReader(File file) throws DbfException {
         try {
@@ -60,7 +54,6 @@ public class DbfReader implements Closeable {
         int dataStartIndex = header.getHeaderLength() - 32 * (header.getFieldsCount() + 1) - 1;
         if (dataStartIndex > 0) {
             dataInput.skipBytes(dataStartIndex);
-            currentRecordIndex = 0;
         }
     }
 
@@ -82,29 +75,17 @@ public class DbfReader implements Closeable {
         if (!canSeek()) {
             throw new DbfException("Seeking is not supported.");
         }
-        if (currentRecordIndex != n) {
-            if (n < 0 || n >= header.getNumberOfRecords()) {
-                throw new DbfException(String.format("Record index out of range [0, %d]: %d",
-                        header.getNumberOfRecords(), n));
-            }
-            long position = header.getHeaderLength() + n * header.getRecordLength();
-            try {
-                ((RandomAccessFile) dataInput).seek(position);
-                currentRecordIndex = n;
-            } catch (IOException e) {
-                currentRecordIndex = INVALID_RECORD_INDEX;
-                throw new DbfException(
-                        String.format("Failed to seek to record %d of %d", n, header.getNumberOfRecords()), e);
-            }
+        if (n < 0 || n >= header.getNumberOfRecords()) {
+            throw new DbfException(String.format("Record index out of range [0, %d]: %d",
+                    header.getNumberOfRecords(), n));
         }
-    }
-
-    /**
-     * @return The current, zero-based record index or {@link org.jamel.dbf.DbfReader#INVALID_RECORD_INDEX} if an error
-     * previously occurred.
-     */
-    public int getCurrentRecordIndex() {
-        return currentRecordIndex;
+        long position = header.getHeaderLength() + n * header.getRecordLength();
+        try {
+            ((RandomAccessFile) dataInput).seek(position);
+        } catch (IOException e) {
+            throw new DbfException(
+                    String.format("Failed to seek to record %d of %d", n, header.getNumberOfRecords()), e);
+        }
     }
 
     /**
@@ -128,13 +109,10 @@ public class DbfReader implements Closeable {
             for (int i = 0; i < header.getFieldsCount(); i++) {
                 recordObjects[i] = readFieldValue(header.getField(i));
             }
-            currentRecordIndex++;
             return recordObjects;
         } catch (EOFException e) {
-            currentRecordIndex = INVALID_RECORD_INDEX;
             return null; // we currently end reading file
         } catch (IOException e) {
-            currentRecordIndex = INVALID_RECORD_INDEX;
             throw new DbfException("Cannot read next record form Dbf file", e);
         }
     }
