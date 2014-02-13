@@ -14,7 +14,7 @@ cd dbf
 
 ## dbf-reader
 
-Maven artifact is available from maven central repocitor. Just add dependency in your pom.xml:
+Maven artifact is available from maven central repository. Just add dependency in your pom.xml:
 
 ```xml
 <dependency>
@@ -151,7 +151,7 @@ public class PricesCalcExampleV2 {
 
 #### 5. Translate DBF to TXT file
 
-If you have no tool for viewing DBF fiels you could simply output all its content to txt file and use your favorite text editor.
+If you have no tool for viewing DBF fields you could simply output all its content to txt file and use your favorite text editor.
 
 ```java
 public class Dbf2Txt {
