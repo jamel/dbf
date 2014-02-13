@@ -9,12 +9,6 @@ import java.io.*;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import static org.jamel.dbf.structure.DbfField.TYPE_CHAR;
-import static org.jamel.dbf.structure.DbfField.TYPE_LOGICAL;
-import static org.jamel.dbf.structure.DbfField.TYPE_FLOAT;
-import static org.jamel.dbf.structure.DbfField.TYPE_DATE;
-import static org.jamel.dbf.structure.DbfField.TYPE_NUMERIC;
-
 /**
  * Dbf reader.
  * This class is not thread safe.
@@ -122,11 +116,11 @@ public class DbfReader implements Closeable {
         dataInput.readFully(buf);
 
         switch (field.getDataType()) {
-            case TYPE_CHAR: return readCharacterValue(field, buf);
-            case TYPE_DATE: return readDateValue(field, buf);
-            case TYPE_FLOAT: return readFloatValue(field, buf);
-            case TYPE_LOGICAL: return readLogicalValue(field, buf);
-            case TYPE_NUMERIC: return readNumericValue(field, buf);
+            case CHAR: return readCharacterValue(field, buf);
+            case DATE: return readDateValue(field, buf);
+            case FLOAT: return readFloatValue(field, buf);
+            case LOGICAL: return readLogicalValue(field, buf);
+            case NUMERIC: return readNumericValue(field, buf);
             default:  return null;
         }
     }

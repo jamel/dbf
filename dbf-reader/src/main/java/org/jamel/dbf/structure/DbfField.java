@@ -16,14 +16,9 @@ import org.jamel.dbf.utils.DbfUtils;
 public class DbfField {
 
     public static final int HEADER_TERMINATOR = 0x0d;
-    public static final byte TYPE_CHAR = 'C';
-    public static final byte TYPE_DATE = 'D';
-    public static final byte TYPE_FLOAT = 'F';
-    public static final byte TYPE_LOGICAL = 'L';
-    public static final byte TYPE_NUMERIC = 'N';
 
     private String fieldName;                   /* 0-10  */
-    private byte dataType;                      /* 11    */
+    private DbfDataType dataType;               /* 11    */
     private int reserv1;                        /* 12-15 */
     private int fieldLength;                    /* 16    */
     private byte decimalCount;                  /* 17    */
@@ -66,8 +61,16 @@ public class DbfField {
             int nonZeroIndex = nameBuf.length - 1;
             while (nonZeroIndex >= 0 && nameBuf[nonZeroIndex] == 0) nonZeroIndex--;
             field.fieldName = new String(nameBuf, 0, nonZeroIndex + 1);
-
-            field.dataType = in.readByte();                     /* 11    */
+            byte fieldType  = in.readByte();
+            field.dataType = DbfDataType.valueOf(fieldType);    /* 11    */
+            if (field.dataType == null) {
+                throw new DbfException(
+                    String.format(
+                        "Unsupported Dbf field type: %s",
+                        Integer.toString(fieldType, 16)
+                    )
+                );
+            }
             field.reserv1 = DbfUtils.readLittleEndianInt(in);   /* 12-15 */
             field.fieldLength = in.readUnsignedByte();          /* 16    */
             field.decimalCount = in.readByte();                 /* 17    */
@@ -88,7 +91,7 @@ public class DbfField {
         return fieldName;
     }
 
-    public byte getDataType() {
+    public DbfDataType getDataType() {
         return dataType;
     }
 
