@@ -14,7 +14,7 @@ cd dbf
 
 ## dbf-reader
 
-Maven artifact is available from maven central repocitor. Just add dependency in your pom.xml:
+Maven artifact is available from maven central repository. Just add dependency in your pom.xml:
 
 ```xml
 <dependency>
@@ -151,7 +151,7 @@ public class PricesCalcExampleV2 {
 
 #### 5. Translate DBF to TXT file
 
-If you have no tool for viewing DBF fiels you could simply output all its content to txt file and use your favorite text editor.
+If you have no tool for viewing DBF fields you could simply output all its content to txt file and use your favorite text editor.
 
 ```java
 public class Dbf2Txt {
@@ -160,6 +160,28 @@ public class Dbf2Txt {
             new File("altnames.dbf"),
             new File("altnames.txt"),
             Charset.forName("cp866"));
+    }
+}
+```
+
+#### 6. Read DBF records at a specified indices
+
+To read one or more records at specific positions in the DBF without iterating through all records, you will have to use the DbfReader constructor which takes a File as an argument.
+
+```java
+public class RandomRecordAccess {
+    public static void main(String[] args) {
+        try (DbfReader reader = new DbfReader(new File("multiple-records.dbf"))) {
+            // read the tenth record (the indices are zero-based)
+            reader.seekToRecord(9);
+            Object[] record = reader.nextRecord();
+            // process the record ...
+
+            // read the third record
+            reader.seekToRecord(2);
+            record = reader.nextRecord();
+            // process the record ...
+        }
     }
 }
 ```

@@ -60,7 +60,8 @@ public class DbfHeader {
 
             header.fields = new ArrayList<>();
             DbfField field;
-            while ((field = DbfField.read(dataInput)) != null) {               /* 32 each */
+            int fieldIndex = 0;
+            while ((field = DbfField.read(dataInput, fieldIndex++)) != null) { /* 32 each */
                 header.fields.add(field);
             }
 

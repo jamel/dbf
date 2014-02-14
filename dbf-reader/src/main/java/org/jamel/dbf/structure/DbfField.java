@@ -18,7 +18,7 @@ public class DbfField {
     public static final int HEADER_TERMINATOR = 0x0d;
 
     private String fieldName;                   /* 0-10  */
-    private byte dataType;                      /* 11    */
+    private DbfDataType dataType;               /* 11    */
     private int reserv1;                        /* 12-15 */
     private int fieldLength;                    /* 16    */
     private byte decimalCount;                  /* 17    */
@@ -28,9 +28,10 @@ public class DbfField {
     private byte setFieldsFlag;                 /* 23    */
     private byte[] reserv4 = new byte[7];       /* 24-30 */
     private byte indexFieldFlag;                /* 31    */
+    private final int fieldIndex;
 
-
-    private DbfField() {
+    private DbfField(int fieldIndex) {
+        this.fieldIndex = fieldIndex;
     }
 
     /**
@@ -43,9 +44,9 @@ public class DbfField {
      * @return created DBFField object.
      * @throws DbfException if any stream reading problems occurs.
      */
-    public static DbfField read(DataInput in) throws DbfException {
+    public static DbfField read(DataInput in, int fieldIndex) throws DbfException {
         try {
-            DbfField field = new DbfField();
+            DbfField field = new DbfField(fieldIndex);
 
             byte firstByte = in.readByte();                     /* 0     */
             if (firstByte == HEADER_TERMINATOR) {
@@ -60,8 +61,16 @@ public class DbfField {
             int nonZeroIndex = nameBuf.length - 1;
             while (nonZeroIndex >= 0 && nameBuf[nonZeroIndex] == 0) nonZeroIndex--;
             field.fieldName = new String(nameBuf, 0, nonZeroIndex + 1);
-
-            field.dataType = in.readByte();                     /* 11    */
+            byte fieldType  = in.readByte();
+            field.dataType = DbfDataType.valueOf(fieldType);    /* 11    */
+            if (field.dataType == null) {
+                throw new DbfException(
+                    String.format(
+                        "Unsupported Dbf field type: %s",
+                        Integer.toString(fieldType, 16)
+                    )
+                );
+            }
             field.reserv1 = DbfUtils.readLittleEndianInt(in);   /* 12-15 */
             field.fieldLength = in.readUnsignedByte();          /* 16    */
             field.decimalCount = in.readByte();                 /* 17    */
@@ -82,7 +91,7 @@ public class DbfField {
         return fieldName;
     }
 
-    public byte getDataType() {
+    public DbfDataType getDataType() {
         return dataType;
     }
 
@@ -92,6 +101,10 @@ public class DbfField {
 
     public int getDecimalCount() {
         return decimalCount;
+    }
+
+    public int getFieldIndex() {
+        return fieldIndex;
     }
 }
 

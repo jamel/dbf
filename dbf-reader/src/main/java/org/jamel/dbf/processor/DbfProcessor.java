@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.jamel.dbf.DbfReader;
 import org.jamel.dbf.exception.DbfException;
+import org.jamel.dbf.structure.DbfDataType;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
 import org.jamel.dbf.utils.StringUtils;
@@ -77,7 +78,7 @@ public final class DbfProcessor {
             while ((row = reader.nextRecord()) != null) {
                 for (int i = 0; i < header.getFieldsCount(); i++) {
                     DbfField field = header.getField(i);
-                    String value = field.getDataType() == 'C'
+                    String value = field.getDataType() == DbfDataType.CHAR
                             ? new String((byte[]) row[i], dbfEncoding)
                             : String.valueOf(row[i]);
                     writer.print(StringUtils.rightPad(value, field.getFieldLength(), ' '));
@@ -123,7 +124,7 @@ public final class DbfProcessor {
                 sb.append('\n')
                         .append("  ").append(rightPad(String.valueOf(i), INDEX_WIDTH, ' '))
                         .append(rightPad(field.getName(), NAME_WIDTH, ' '))
-                        .append(rightPad(String.valueOf((char) field.getDataType()), TYPE_WIDTH, ' '))
+                        .append(rightPad(String.valueOf((char) field.getDataType().byteValue), TYPE_WIDTH, ' '))
                         .append(rightPad(String.valueOf(field.getFieldLength()), LENGTH_WIDTH, ' '))
                         .append(rightPad(String.valueOf(field.getDecimalCount()), DECIMAL_WIDTH, ' '));
             }

@@ -17,18 +17,16 @@ import java.util.GregorianCalendar;
  * @see <a href="http://www.fship.com/dbfspecs.txt">DBF specification</a>
  */
 public class DbfReader implements Closeable {
-
     protected final byte DATA_ENDED = 0x1A;
     protected final byte DATA_DELETED = 0x2A;
 
-    private DataInputStream dataInputStream;
+    private DataInput dataInput;
     private final DbfHeader header;
-
 
     public DbfReader(File file) throws DbfException {
         try {
-            dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
-            header = DbfHeader.read(dataInputStream);
+            dataInput = new RandomAccessFile(file, "r");
+            header = DbfHeader.read(dataInput);
             skipToDataBeginning();
         } catch (IOException e) {
             throw new DbfException("Cannot open Dbf file " + file, e);
@@ -37,8 +35,8 @@ public class DbfReader implements Closeable {
 
     public DbfReader(InputStream in) throws DbfException {
         try {
-            dataInputStream = new DataInputStream(new BufferedInputStream(in));
-            header = DbfHeader.read(dataInputStream);
+            dataInput = new DataInputStream(new BufferedInputStream(in));
+            header = DbfHeader.read(dataInput);
             skipToDataBeginning();
         } catch (IOException e) {
             throw new DbfException("Cannot read Dbf", e);
@@ -49,7 +47,38 @@ public class DbfReader implements Closeable {
         // it might be required to jump to the start of records at times
         int dataStartIndex = header.getHeaderLength() - 32 * (header.getFieldsCount() + 1) - 1;
         if (dataStartIndex > 0) {
-            dataInputStream.skip(dataStartIndex);
+            dataInput.skipBytes(dataStartIndex);
+        }
+    }
+
+    /**
+     * @return {@code true} if the reader can seek forward or backward to a specified record index,
+     * {@code false} otherwise.
+     */
+    public boolean canSeek() {
+        return dataInput instanceof RandomAccessFile;
+    }
+
+    /**
+     * Attempt to seek to a specified record index. If successful the record can be read
+     * by calling {@link DbfReader#nextRecord()}.
+     *
+     * @param n The zero-based record index.
+     */
+    public void seekToRecord(int n) {
+        if (!canSeek()) {
+            throw new DbfException("Seeking is not supported.");
+        }
+        if (n < 0 || n >= header.getNumberOfRecords()) {
+            throw new DbfException(String.format("Record index out of range [0, %d]: %d",
+                    header.getNumberOfRecords(), n));
+        }
+        long position = header.getHeaderLength() + n * header.getRecordLength();
+        try {
+            ((RandomAccessFile) dataInput).seek(position);
+        } catch (IOException e) {
+            throw new DbfException(
+                    String.format("Failed to seek to record %d of %d", n, header.getNumberOfRecords()), e);
         }
     }
 
@@ -62,11 +91,11 @@ public class DbfReader implements Closeable {
         try {
             int nextByte;
             do {
-                nextByte = dataInputStream.readByte();
+                nextByte = dataInput.readByte();
                 if (nextByte == DATA_ENDED) {
                     return null;
                 } else if (nextByte == DATA_DELETED) {
-                    dataInputStream.skipBytes(header.getRecordLength() - 1);
+                    dataInput.skipBytes(header.getRecordLength() - 1);
                 }
             } while (nextByte == DATA_DELETED);
 
@@ -84,14 +113,14 @@ public class DbfReader implements Closeable {
 
     private Object readFieldValue(DbfField field) throws IOException {
         byte buf[] = new byte[field.getFieldLength()];
-        dataInputStream.read(buf);
+        dataInput.readFully(buf);
 
         switch (field.getDataType()) {
-            case 'C': return readCharacterValue(field, buf);
-            case 'D': return readDateValue(field, buf);
-            case 'F': return readFloatValue(field, buf);
-            case 'L': return readLogicalValue(field, buf);
-            case 'N': return readNumericValue(field, buf);
+            case CHAR: return readCharacterValue(field, buf);
+            case DATE: return readDateValue(field, buf);
+            case FLOAT: return readFloatValue(field, buf);
+            case LOGICAL: return readLogicalValue(field, buf);
+            case NUMERIC: return readNumericValue(field, buf);
             default:  return null;
         }
     }
@@ -150,9 +179,9 @@ public class DbfReader implements Closeable {
     public void close() {
         try {
             // this method should be idempotent
-            if (dataInputStream != null) {
-                dataInputStream.close();
-                dataInputStream = null;
+            if (dataInput instanceof Closeable) {
+                ((Closeable) dataInput).close();
+                dataInput = null;
             }
         } catch (IOException e) {
             // ignore
