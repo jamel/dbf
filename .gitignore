@@ -1,10 +1,10 @@
 *.class
+*.jar
+*.iml
+*.ipr
+*.iws
+*.swp
+
 .gradle/
 out/
-target/
-build/
-
-# Package Files #
-*.jar
-*.war
-*.ear
+build
