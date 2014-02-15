@@ -1,0 +1,67 @@
+/**
+ * Adds task for upload built archives to Sonatype OSS maven repo
+ */
+
+apply plugin: "signing"
+apply plugin: "maven"
+
+
+def isReleaseBuild = false
+def isSnapshotBuild = false
+def isDevBuild = false
+
+if (hasProperty("release")) {
+    isReleaseBuild = true
+} else if (hasProperty("snapshot")) {
+    isSnapshotBuild = true
+} else {
+    isDevBuild = true
+}
+
+if (!isReleaseBuild) {
+    version = version + "-SNAPSHOT"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from docsDir
+}
+
+task sourcesJar(type: Jar) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+if (isReleaseBuild) {
+    signing { sign configurations.archives }
+} else {
+    task signArchives { /* do nothing */ }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        configuration = configurations.archives
+        uniqueVersion = false
+
+        if (isDevBuild) {
+            repository(url: "file://${System.getProperty('user.home')}/.m2/repository/")
+        } else {
+            if (isReleaseBuild) {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+        }
+    }
+}

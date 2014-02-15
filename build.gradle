@@ -1,80 +1,22 @@
-description = "Java library for fast reading DBF-files"
-
 defaultTasks "clean", "build"
-
-def isReleaseBuild = false
-def isSnapshotBuild = false
-def isDevBuild = false
-
-if (hasProperty("release")) {
-    isReleaseBuild = true
-} else if (hasProperty("snapshot")) {
-    isSnapshotBuild = true
-} else {
-    isDevBuild = true
-}
 
 allprojects {
     apply plugin: "idea"
 
+    description = "Java library for fast reading DBF-files"
     group = "org.jamel.dbf"
-    version = "0.0.3${isReleaseBuild ? "" : "-SNAPSHOT"}"
-
-    repositories {
-        mavenCentral()
-    }
+    version = "0.0.3"
 }
 
 subprojects {
     apply plugin: "java"
-    apply plugin: "maven"
-    apply plugin: "signing"
+    apply from: "${rootDir}/gradle/oss.gradle"
     apply from: "${rootDir}/gradle/pom.gradle"
 
     compileJava.options.encoding = "UTF-8"
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = "javadoc"
-        from docsDir
-    }
-
-    task sourcesJar(type: Jar) {
-        classifier = "sources"
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives jar
-        archives javadocJar
-        archives sourcesJar
-    }
-
-    if (isReleaseBuild) {
-        signing { sign configurations.archives }
-    } else {
-        task signArchives { /* do nothing */ }
-    }
-
-    uploadArchives {
-        repositories.mavenDeployer {
-            configuration = configurations.archives
-            uniqueVersion = false
-
-            if (isDevBuild) {
-                repository(url: "file://${System.getProperty('user.home')}/.m2/repository/")
-            } else {
-                if (isReleaseBuild) {
-                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-                }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                    authentication(userName: sonatypeUsername, password: sonatypePassword)
-                }
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: sonatypeUsername, password: sonatypePassword)
-                }
-            }
-        }
+    repositories {
+        mavenCentral()
     }
 
     dependencies {
