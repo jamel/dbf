@@ -5,7 +5,7 @@ allprojects {
 
     description = "Java library for fast reading DBF-files"
     group = "org.jamel.dbf"
-    version = "0.0.3"
+    version = "0.1.0"
 }
 
 subprojects {
