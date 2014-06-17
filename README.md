@@ -9,7 +9,7 @@ For build project from sources you need to run gradlew script from the root dire
 ```sh
 git clone git@github.com:jamel/dbf.git
 cd dbf
-./grablew clean build
+./gradlew clean build
 ```
 
 ## dbf-reader
