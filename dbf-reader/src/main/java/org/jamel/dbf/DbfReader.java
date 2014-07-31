@@ -121,6 +121,7 @@ public class DbfReader implements Closeable {
             case FLOAT: return readFloatValue(field, buf);
             case LOGICAL: return readLogicalValue(field, buf);
             case NUMERIC: return readNumericValue(field, buf);
+            case MEMO: return readMemoLink(field, buf);
             default:  return null;
         }
     }
@@ -158,6 +159,17 @@ public class DbfReader implements Closeable {
             return processable ? Double.valueOf(new String(numericBuf)) : null;
         } catch (NumberFormatException e) {
             throw new DbfException("Failed to parse Number from " + field.getName(), e);
+        }
+    }
+
+    protected Number readMemoLink(DbfField field, byte[] buf) throws IOException {
+        switch (field.getFieldLength()) {
+            case 4:
+                return DbfUtils.readLittleEndianInt(new DataInputStream(new ByteArrayInputStream(buf)));
+            case 10:
+                return readNumericValue(field, buf);
+            default:
+                throw new DbfException("Unknown MEMO mode: " + field.getFieldLength());
         }
     }
 
