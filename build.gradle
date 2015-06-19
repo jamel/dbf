@@ -1,5 +1,7 @@
 defaultTasks "clean", "build"
 
+sourceCompatibility = JavaVersion.VERSION_1_6 
+
 allprojects {
     apply plugin: "idea"
 
