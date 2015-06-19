@@ -1,3 +1,5 @@
+sourceCompatibility = JavaVersion.VERSION_1_6 
+
 modifyPom { pom ->
     pom.project {
         name "Java DBF reader"
