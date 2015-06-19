@@ -1,4 +1,3 @@
-sourceCompatibility = JavaVersion.VERSION_1_6 
 
 modifyPom { pom ->
     pom.project {
