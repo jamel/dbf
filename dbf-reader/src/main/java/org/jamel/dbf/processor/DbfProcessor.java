@@ -12,12 +12,14 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.jamel.dbf.DbfReader;
 import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.structure.DbfDataType;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
 import org.jamel.dbf.utils.StringUtils;
+
 import static org.jamel.dbf.utils.StringUtils.rightPad;
 
 /**
