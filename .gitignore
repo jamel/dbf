@@ -8,3 +8,4 @@
 .gradle/
 out/
 build
+/.nb-gradle/private/
