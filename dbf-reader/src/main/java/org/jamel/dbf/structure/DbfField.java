@@ -36,7 +36,6 @@ public class DbfField {
 
     /**
      * <p>Creates a DBFField object from the data read from the given DataInputStream.</p>
-     * <p/>
      * <p>The data in the DataInputStream object is supposed to be organised correctly
      * and the stream "pointer" is supposed to be positioned properly.</p>
      *

@@ -1,7 +1,11 @@
 defaultTasks "clean", "build"
 
+
 allprojects {
     apply plugin: "idea"
+    apply plugin: "java"
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
 
     description = "Java library for fast reading DBF-files"
     group = "org.jamel.dbf"

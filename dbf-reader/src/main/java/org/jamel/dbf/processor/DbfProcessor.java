@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -34,6 +35,27 @@ public final class DbfProcessor {
 
 
     private DbfProcessor() {
+    }
+    
+    /**
+     * 
+     * @param <T> Output type
+     * @param inputStream Input stream
+     * @param rowMapper Row mapper
+     * @return Mapped rows
+     * @throws DbfException 
+     */
+    public static <T> List<T> loadData(InputStream inputStream, DbfRowMapper<T> rowMapper) throws DbfException
+    {
+         try (DbfReader reader = new DbfReader(inputStream)) {
+            List<T> result = new ArrayList<>(reader.getRecordCount());
+            Object[] row;
+            while ((row = reader.nextRecord()) != null) {
+                result.add(rowMapper.mapRow(row));
+            }
+
+            return result;
+        }
     }
 
     public static <T> List<T> loadData(File dbf, DbfRowMapper<T> rowMapper) throws DbfException {
