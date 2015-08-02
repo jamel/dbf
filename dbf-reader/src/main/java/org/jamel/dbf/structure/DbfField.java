@@ -57,8 +57,8 @@ public class DbfField {
             in.readFully(nameBuf, 1, 10);
             nameBuf[0] = firstByte;
 
-            int nonZeroIndex = nameBuf.length - 1;
-            while (nonZeroIndex >= 0 && nameBuf[nonZeroIndex] == 0) nonZeroIndex--;
+            int nonZeroIndex = 0;
+            while (nonZeroIndex < nameBuf.length && nameBuf[nonZeroIndex + 1 ] != 0) nonZeroIndex++;
             field.fieldName = new String(nameBuf, 0, nonZeroIndex + 1);
             byte fieldType  = in.readByte();
             field.dataType = DbfDataType.valueOf(fieldType);    /* 11    */
