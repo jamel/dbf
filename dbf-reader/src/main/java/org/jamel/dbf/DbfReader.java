@@ -1,13 +1,21 @@
 package org.jamel.dbf;
 
+import java.io.BufferedInputStream;
+import java.io.Closeable;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
 import org.jamel.dbf.utils.DbfUtils;
-
-import java.io.*;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 /**
  * Dbf reader.
@@ -121,6 +129,7 @@ public class DbfReader implements Closeable {
             case FLOAT: return readFloatValue(field, buf);
             case LOGICAL: return readLogicalValue(field, buf);
             case NUMERIC: return readNumericValue(field, buf);
+            case INTEGER: return readIntegerValue(field, buf);
             default:  return null;
         }
     }
@@ -158,6 +167,16 @@ public class DbfReader implements Closeable {
             return processable ? Double.valueOf(new String(numericBuf)) : null;
         } catch (NumberFormatException e) {
             throw new DbfException("Failed to parse Number from " + field.getName(), e);
+        }
+    }
+
+    protected Integer readIntegerValue(DbfField field, byte[] buf) throws IOException {
+        try {
+        	if (buf.length != 4) throw new DbfException("Failed to parse Integer from " + field.getName());
+        	int x = java.nio.ByteBuffer.wrap(buf).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+            return x;
+        } catch (NumberFormatException e) {
+            throw new DbfException("Failed to parse Integer from " + field.getName(), e);
         }
     }
 

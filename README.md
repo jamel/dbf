@@ -33,6 +33,7 @@ date (D) | `java.util.Date`
 float (F) | `java.lang.Float`
 logical (L) | `java.lang.Boolean`
 numeric (N) | `java.lang.Number`
+integer (I) | `java.lang.Integer`
 
 ### How to use
 
