@@ -3,11 +3,15 @@ package org.jamel.dbf;
 import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.structure.DbfField;
 import org.jamel.dbf.structure.DbfHeader;
+import org.jamel.dbf.structure.DbfRow;
 import org.jamel.dbf.utils.DbfUtils;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
+import static java.nio.charset.Charset.defaultCharset;
 
 /**
  * Dbf reader.
@@ -19,6 +23,8 @@ import java.util.GregorianCalendar;
 public class DbfReader implements Closeable {
     protected final byte DATA_ENDED = 0x1A;
     protected final byte DATA_DELETED = 0x2A;
+
+    private Charset charset = defaultCharset();
 
     private DataInput dataInput;
     private final DbfHeader header;
@@ -33,6 +39,11 @@ public class DbfReader implements Closeable {
         }
     }
 
+    public DbfReader(File file, Charset charset) throws DbfException {
+        this(file);
+        this.charset = charset;
+    }
+
     public DbfReader(InputStream in) throws DbfException {
         try {
             dataInput = new DataInputStream(new BufferedInputStream(in));
@@ -41,6 +52,11 @@ public class DbfReader implements Closeable {
         } catch (IOException e) {
             throw new DbfException("Cannot read Dbf", e);
         }
+    }
+
+    public DbfReader(InputStream in, Charset charset) throws DbfException {
+        this(in);
+        this.charset = charset;
     }
 
     private void skipToDataBeginning() throws IOException {
@@ -80,6 +96,13 @@ public class DbfReader implements Closeable {
             throw new DbfException(
                     String.format("Failed to seek to record %d of %d", n, header.getNumberOfRecords()), e);
         }
+    }
+
+    public DbfRow nextRow() {
+        Object[] record = nextRecord();
+        return record == null
+                ? null
+                : new DbfRow(header, charset, record);
     }
 
     /**
