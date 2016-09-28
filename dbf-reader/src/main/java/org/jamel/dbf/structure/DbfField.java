@@ -1,10 +1,10 @@
 package org.jamel.dbf.structure;
 
-import java.io.DataInput;
-import java.io.IOException;
-
 import org.jamel.dbf.exception.DbfException;
 import org.jamel.dbf.utils.DbfUtils;
+
+import java.io.DataInput;
+import java.io.IOException;
 
 
 /**
@@ -57,9 +57,9 @@ public class DbfField {
             in.readFully(nameBuf, 1, 10);
             nameBuf[0] = firstByte;
 
-            int nonZeroIndex = nameBuf.length - 1;
-            while (nonZeroIndex >= 0 && nameBuf[nonZeroIndex] == 0) nonZeroIndex--;
-            field.fieldName = new String(nameBuf, 0, nonZeroIndex + 1);
+            int zeroIndex = 0;
+            while (zeroIndex < nameBuf.length && nameBuf[zeroIndex] != 0) zeroIndex++;
+            field.fieldName = new String(nameBuf, 0, zeroIndex);
             byte fieldType  = in.readByte();
             field.dataType = DbfDataType.valueOf(fieldType);    /* 11    */
             if (field.dataType == null) {

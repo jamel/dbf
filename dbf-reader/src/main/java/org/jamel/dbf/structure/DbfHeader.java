@@ -1,12 +1,14 @@
 package org.jamel.dbf.structure;
 
+import org.jamel.dbf.exception.DbfException;
+import org.jamel.dbf.utils.DbfUtils;
+
 import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import org.jamel.dbf.exception.DbfException;
-import org.jamel.dbf.utils.DbfUtils;
+import java.util.Map;
 
 /**
  * DBF Header (variable size, depending on field count)
@@ -33,6 +35,8 @@ public class DbfHeader {
     private byte languageDriver;         /* 29    */
     private short reserv4;               /* 30-31 */
     private List<DbfField> fields;       /* each 32 bytes */
+
+    private Map<String, Integer> fieldIndexesByNames;
 
 
     public static DbfHeader read(DataInput dataInput) throws DbfException {
@@ -101,5 +105,21 @@ public class DbfHeader {
 
     public short getRecordLength() {
         return recordLength;
+    }
+
+    public int getFieldIndex(String fieldName) {
+        if (fieldIndexesByNames == null) {
+            initFieldIndexesByNames();
+        }
+        Integer index = fieldIndexesByNames.get(fieldName);
+        return index == null ? -1 : index;
+    }
+
+    private void initFieldIndexesByNames() {
+        fieldIndexesByNames = new HashMap<>(fields.size());
+        for (int i = 0; i < fields.size(); i++) {
+            DbfField field = fields.get(i);
+            fieldIndexesByNames.put(field.getName(), i);
+        }
     }
 }

@@ -149,6 +149,15 @@ public class PricesCalcExampleV2 {
 }
 ```
 
+To get column values you can also use ResultSet-like API. The while loop from the last example can be rewritten like this:
+
+```java
+DbfRow row;
+while ((row = reader.nextRow()) != null) {
+    totalSum += row.getDouble("Price");
+}
+```
+
 #### 5. Translate DBF to TXT file
 
 If you have no tool for viewing DBF fields you could simply output all its content to txt file and use your favorite text editor.
