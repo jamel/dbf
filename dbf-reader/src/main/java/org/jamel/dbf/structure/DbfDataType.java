@@ -9,7 +9,8 @@ public enum DbfDataType {
     DATE('D'),
     FLOAT('F'),
     LOGICAL('L'),
-    NUMERIC('N');
+    NUMERIC('N'),
+    MEMO('M');
 
     public final byte byteValue;
 
