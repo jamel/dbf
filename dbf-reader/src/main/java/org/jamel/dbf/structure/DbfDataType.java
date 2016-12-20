@@ -9,11 +9,12 @@ public enum DbfDataType {
     DATE('D'),
     FLOAT('F'),
     LOGICAL('L'),
+    MEMO('M'),
     NUMERIC('N');
 
     public final byte byteValue;
 
-    private DbfDataType(char byteValue) {
+    DbfDataType(char byteValue) {
         this.byteValue = (byte) (byteValue & 0xff);
     }
 
