@@ -14,7 +14,7 @@ public enum DbfDataType {
 
     public final byte byteValue;
 
-    private DbfDataType(char byteValue) {
+    DbfDataType(char byteValue) {
         this.byteValue = (byte) (byteValue & 0xff);
     }
 
