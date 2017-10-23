@@ -99,6 +99,10 @@ public class DbfHeader {
         return fields.get(i);
     }
 
+    public DbfField getField(String fieldName) {
+        return getField(getFieldIndex(fieldName));
+    }
+
     public int getNumberOfRecords() {
         return numberOfRecords;
     }
