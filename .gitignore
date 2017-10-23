@@ -9,3 +9,5 @@
 out/
 build
 /.nb-gradle/private/
+
+.idea
