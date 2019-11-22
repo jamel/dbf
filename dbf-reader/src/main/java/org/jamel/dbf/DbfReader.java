@@ -106,8 +106,37 @@ public class DbfReader implements Closeable {
     }
 
     /**
-     * Reads and returns the next row in the Dbf stream
+     * for custom user, only when you understand the file content
+     * @param length
+     */
+    public void skipBytes(int length) {
+        try {
+            dataInput.skipBytes(length);
+        } catch (IOException e) {
+            throw new DbfException("Cannot skip " + length + " bytes", e);
+        }
+    }
+
+    /**
      *
+     * for custom user, only when you understand the file content
+     * @param length
+     * @return
+     */
+    public byte[] readBytes(int length) {
+        byte[] bytes = new byte[length];
+        try {
+            dataInput.readFully(bytes);
+            return bytes;
+        } catch (IOException e) {
+            throw new DbfException("Cannot read " + length + " bytes", e);
+        }
+    }
+
+    /**
+     * Reads and returns the next row in the Dbf stream<br/>
+     * a deleted row start with "*" <br/>
+     * a normal row start with " "
      * @return The next row as an Object array.
      */
     public Object[] nextRecord() {
@@ -122,6 +151,31 @@ public class DbfReader implements Closeable {
                 }
             } while (nextByte == DATA_DELETED);
 
+            Object recordObjects[] = new Object[header.getFieldsCount()];
+            for (int i = 0; i < header.getFieldsCount(); i++) {
+                recordObjects[i] = readFieldValue(header.getField(i));
+            }
+            return recordObjects;
+        } catch (EOFException e) {
+            return null; // we currently end reading file
+        } catch (IOException e) {
+            throw new DbfException("Cannot read next record form Dbf file", e);
+        }
+    }
+
+    /**
+     * Reads and returns the next row in the Dbf stream<br/>
+     * a deleted row start with "*" <br/>
+     * a normal row start with " " <br/>
+     * so we just ignore the first byte
+     * @return The next row as an Object array.
+     */
+    public Object[] nextRecordIgnoreDelete() {
+        try {
+            int nextByte = dataInput.readByte();
+            if (nextByte == DATA_ENDED) {
+                return null;
+            }
             Object recordObjects[] = new Object[header.getFieldsCount()];
             for (int i = 0; i < header.getFieldsCount(); i++) {
                 recordObjects[i] = readFieldValue(header.getField(i));
@@ -178,7 +232,7 @@ public class DbfReader implements Closeable {
     protected Number readNumericValue(DbfField field, byte[] buf) throws IOException {
         try {
             byte[] numericBuf = DbfUtils.trimLeftSpaces(buf);
-            boolean processable = numericBuf.length > 0 && !DbfUtils.contains(numericBuf, (byte) '?');
+            boolean processable = numericBuf.length > 0 && !DbfUtils.contains(numericBuf, (byte) '?') && !DbfUtils.contains(numericBuf, (byte) '-');
             return processable ? Double.valueOf(new String(numericBuf)) : null;
         } catch (NumberFormatException e) {
             throw new DbfException("Failed to parse Number from " + field.getName(), e);
